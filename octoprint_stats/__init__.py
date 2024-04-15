@@ -797,7 +797,7 @@ class StatsPlugin(octoprint.plugin.EventHandlerPlugin,
         # prevent run of not fully started plugin
         if not hasattr(self, 'statDB'):
             return
-        
+
         if "owner" not in payload:
             payload["owner"] = "N/A"
         if "user" not in payload:
@@ -856,7 +856,7 @@ class StatsPlugin(octoprint.plugin.EventHandlerPlugin,
                     tool2_target = temps["tool2"]["target"]
 
             eventData = {'event_type': 'PRINT_STARTED',
-                         'data': {'event_time': datetime.datetime.today().__str__(), 'file': file, 'origin': origin, 'bed_target': bed_target, 'tool0_target': tool0_target, 'tool1_target': tool1_target, 'tool2_target': tool2_target, 'size': size, 'owner': owner, 'user': user, 'name': name}}
+                         'data': {'event_time': datetime.datetime.today().__str__(), 'file': file, 'origin': origin, 'bed_target': bed_target, 'tool0_target': tool0_target, 'tool1_target': tool1_target, 'tool2_target': tool2_target, 'size': size, 'owner': owner, 'user': user, 'name': name, }}
 
         if event == octoprint.events.Events.PRINT_DONE:
             name = payload['name']
@@ -880,6 +880,7 @@ class StatsPlugin(octoprint.plugin.EventHandlerPlugin,
             tool0_length = 0
             tool1_length = 0
             tool2_length = 0
+            filament_length = 0
 
             from octoprint.server import printer
             if printer is not None:
@@ -892,6 +893,8 @@ class StatsPlugin(octoprint.plugin.EventHandlerPlugin,
                     tool1_actual = temps["tool1"]["actual"]
                 if "tool2" in temps:
                     tool2_actual = temps["tool2"]["actual"]
+                job = printer.get_current_job()
+                filament_length = job["filament"]["length"]
 
             try:
                 printData = self._file_manager.get_metadata(origin, file)
@@ -911,7 +914,7 @@ class StatsPlugin(octoprint.plugin.EventHandlerPlugin,
                         tool2_length = printData["analysis"]["filament"]["tool2"]['length']
 
             eventData = {'event_type': 'PRINT_DONE',
-                         'data': {'event_time': datetime.datetime.today().__str__(), 'file': file, 'ptime': ptime, 'origin': origin, 'bed_actual': bed_actual, 'tool0_actual': tool0_actual, 'tool1_actual': tool1_actual, 'tool2_actual': tool2_actual, 'tool0_volume': tool0_volume, 'tool1_volume': tool1_volume, 'tool2_volume': tool2_volume, 'tool0_length': tool0_length, 'tool1_length': tool1_length, 'tool2_length': tool2_length, 'name': name, 'size': size, 'owner': owner}}
+                         'data': {'event_time': datetime.datetime.today().__str__(), 'file': file, 'ptime': ptime, 'origin': origin, 'bed_actual': bed_actual, 'tool0_actual': tool0_actual, 'tool1_actual': tool1_actual, 'tool2_actual': tool2_actual, 'tool0_volume': tool0_volume, 'tool1_volume': tool1_volume, 'tool2_volume': tool2_volume, 'tool0_length': tool0_length, 'tool1_length': tool1_length, 'tool2_length': tool2_length, 'name': name, 'size': size, 'owner': owner, 'filament_length': filament_length}}
 
         if event == octoprint.events.Events.PRINT_FAILED and payload["reason"] == "error":
             if payload["path"] != None:
